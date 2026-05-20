@@ -1,46 +1,45 @@
 package koszyk;
 import java.util.*;
+import static koszyk.Comparators.*;
 
 public class Koszyk {
-    public Product[] contents = new Product[0];
-    public String[] appliedPromotions = new String[0];
-
-    private void sortByPriceDescAndNameAsc(){
-        Arrays.sort(contents, Comparator.comparingDouble(Product::getCurrentPrice).reversed()
-                        .thenComparing(Product::getName));
+    ArrayList<Product> contents = new ArrayList<Product>();
+    ArrayList<String> appliedPromotions = new ArrayList<String>();
+    public int getContentsSize(){
+        return contents.size();
+    }
+    public ArrayList<String> getAppliedPromotions(){
+        return appliedPromotions;
+    }
+    private void sortCustom(Comparator<Product> c1, Comparator<Product> c2) {
+        contents.sort(c1.thenComparing(c2));
     }
 
     public void addProduct(Product p){
-        if(p.price == 0 && !Objects.equals(p.name, "Kubek firmowy")){
+        if(p.code == null || p.name == null){
+            System.out.println("próba dodania produktu z polem null - nie można takiego dodać");
+            return;
+        }
+        else if(p.price == 0 && !Objects.equals(p.name, "Kubek firmowy")){
             System.out.println("cena produktu 0.00 - nie można takiego dodać");
             return;
         }
-        if(isEmpty()){
-            Product[] newArray = new Product[]{p};
-            contents = newArray;
-            return;
-        }
-        Product[] newArray = new Product[contents.length+1];
-        for (int i = 0; i < contents.length; i++) {
-            newArray[i] = contents[i];
-        }
-        newArray[newArray.length-1] = p;
-        contents = newArray;
-        sortByPriceDescAndNameAsc();
+        contents.add(p);
+        sortCustom(byDiscountPrice.reversed(), byName);
     }
 
-    public int findProductPosition(Product[] tab, Product p){
-        for (int i = 0; i < tab.length; i++) {
-            if(tab[i].code.equals(p.code) && tab[i].name.equals(p.name) && tab[i].price == p.price){
+    public int findProductPosition(Product p){
+        for (int i = 0; i < contents.size(); i++) {
+            if(contents.get(i).code.equals(p.code) && contents.get(i).name.equals(p.name) && contents.get(i).price == p.price){
                 return i;
             }
         }
         return -1;
     }
 
-    public int findProductPositionFromName(Product[] tab, String n){
-        for (int i = 0; i < tab.length; i++) {
-            if(tab[i].name.equals(n)){
+    public int findProductPositionFromName(String n){
+        for (int i = 0; i < contents.size(); i++) {
+            if(contents.get(i).name.equals(n)){
                 return i;
             }
         }
@@ -51,49 +50,40 @@ public class Koszyk {
         if(isEmpty()){
             return;
         }
-        int searchedIndex = findProductPosition(contents, p);
+        int searchedIndex = findProductPosition(p);
         if (searchedIndex == -1){
             return;
         }
-        Product[] newArray = new Product[contents.length-1];
-        for (int i = 0; i < contents.length-1; i++) {
-            if(i < searchedIndex){
-                newArray[i] = contents[i];
-            }
-            else{
-                newArray[i] = contents[i+1];
-            }
-        }
-        contents = newArray;
-        sortByPriceDescAndNameAsc();
+        contents.remove(searchedIndex);
+        sortCustom(byDiscountPrice.reversed(), byName);
     }
 
     public boolean isEmpty(){
-        return contents.length == 0;
+        return contents.isEmpty();
     }
 
-    public Product findCheapest(Product[] tab){
-        Product cheapest = findMostExpensive(contents);
-        for (int i = 1; i < tab.length; i++) {
-            if(tab[i].price < cheapest.price && tab[i].priceDiscounted != 0.00){
-                cheapest = tab[i];
+    public Product findCheapest(){
+        Product cheapest = findMostExpensive();
+        for (int i = 1; i < contents.size(); i++) {
+            if(contents.get(i).price < cheapest.price && contents.get(i).priceDiscounted != 0.00){
+                cheapest = contents.get(i);
             }
         }
         return cheapest;
     }
 
-    public Product findMostExpensive(Product[] tab){
+    public Product findMostExpensive(){
         if(isEmpty()){
             return null;
         }
-        else if(contents.length == 1){
-            return tab[0];
+        else if(contents.size() == 1){
+            return contents.getFirst();
         }
         else{
-            Product mostExp = tab[0];
-            for (int i = 1; i < tab.length; i++) {
-                if(tab[i].price > mostExp.price){
-                    mostExp = tab[i];
+            Product mostExp = contents.getFirst();
+            for (int i = 1; i < contents.size(); i++) {
+                if(contents.get(i).price > mostExp.price){
+                    mostExp = contents.get(i);
                 }
             }
             return mostExp;
@@ -102,19 +92,19 @@ public class Koszyk {
 
     public double sumPrice(){
         double sum = 0.0;
-        for (int i = 0; i < contents.length; i++) {
-            sum += contents[i].getCurrentPrice();
+        for (int i = 0; i < contents.size(); i++) {
+            sum += contents.get(i).getCurrentPrice();
         }
         return sum;
     }
 
     public boolean isPromoAlreadyApplied(String type){
-        if(appliedPromotions.length == 0){
+        if(appliedPromotions.isEmpty()){
             return false;
         }
 
-        for (int i = 0; i < appliedPromotions.length; i++) {
-            if (appliedPromotions[i].equals(type)) {
+        for (int i = 0; i < appliedPromotions.size(); i++) {
+            if (appliedPromotions.get(i).equals(type)) {
                 return true;
             }
         }
@@ -122,20 +112,11 @@ public class Koszyk {
     }
 
     public void addDiscount(String type){
-        if(isEmpty()){
-            appliedPromotions = new String[0];
-            return;
-        }
         if(isPromoAlreadyApplied(type)){
             System.out.println("promocja już jest zaaplikowana");
             return;
         }
-        String[] newArray = new String[appliedPromotions.length+1];
-        for (int i = 0; i < appliedPromotions.length; i++) {
-            newArray[i] = appliedPromotions[i];
-        }
-        newArray[newArray.length-1] = type;
-        appliedPromotions = newArray;
+        appliedPromotions.add(type);
 
         switch(type){
             case "over300":
@@ -147,19 +128,20 @@ public class Koszyk {
                 addProduct(new Product("F00", "Kubek firmowy", 0.00));
                 break;
             case "TwoPlusOne":
-                int applyAmount = contents.length / 3;
+                int applyAmount = contents.size() / 3;
                 System.out.println(applyAmount);
                 for(int i = 0; i < applyAmount; i++){
-                    int j = findProductPosition(contents, findCheapest(contents));
-                    contents[j].priceDiscounted = 0.00;
+                    int j = findProductPosition(findCheapest());
+                    contents.get(j).priceDiscounted = 0.00;
                 }
                 break;
             case "Coupon30OffBucket":
-                int i = findProductPositionFromName(contents, "Bucket");
-                contents[i].priceDiscounted = contents[i].price * 0.7;
+                int i = findProductPositionFromName("Bucket");
+                contents.get(i).priceDiscounted = contents.get(i).price * 0.7;
                 break;
             default:
-                return;
+                break;
         }
+        sortCustom(byDiscountPrice.reversed(), byName);
     }
 }

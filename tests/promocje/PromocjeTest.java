@@ -15,7 +15,7 @@ public class PromocjeTest {
     @Test
     public void ApplyPromotionEmptyCart(){
         prom1.applyPromo(k);
-        assertEquals(0, k.appliedPromotions.length);
+        assertEquals(0, k.getAppliedPromotions().size());
     }
 
     @Test
@@ -23,7 +23,7 @@ public class PromocjeTest {
         k.addProduct(pOver300);
         prom1.applyPromo(k);
         prom1.applyPromo(k);
-        assertEquals(1, k.appliedPromotions.length);
+        assertEquals(1, k.getAppliedPromotions().size());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class PromocjeTest {
     public void ApplyFreeCupProm(){
         k.addProduct(pOver300);
         prom2.applyPromo(k);
-        assertEquals(2, k.contents.length);
+        assertEquals(2, k.getContentsSize());
     }
 
     @Test
@@ -45,7 +45,7 @@ public class PromocjeTest {
         prom1.applyPromo(k);
         prom2.applyPromo(k);
         assertEquals(332.5, k.sumPrice());
-        assertEquals(2, k.contents.length);
+        assertEquals(2, k.getContentsSize());
     }
 
     @Test
