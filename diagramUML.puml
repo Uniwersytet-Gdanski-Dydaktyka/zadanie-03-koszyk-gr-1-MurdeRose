@@ -1,0 +1,64 @@
+@startuml
+class promocje.coupon30ProcentOffBucket {
++ void applyPromo(Koszyk)
+}
+
+class Main {
+}
+class koszyk.Comparators {
++ {static} Comparator<Product> byDiscountPrice
++ {static} Comparator<Product> byName
+}
+
+class promocje.over300 {
++ void applyPromo(Koszyk)
+}
+
+class koszyk.Koszyk {
+~ ArrayList<Product> contents
+~ ArrayList<String> appliedPromotions
++ int getContentsSize()
++ ArrayList<String> getAppliedPromotions()
+- void sortCustom(Comparator<Product>,Comparator<Product>)
++ void addProduct(Product)
++ int findProductPosition(Product)
++ int findProductPositionFromName(String)
++ void removeProduct(Product)
++ boolean isEmpty()
++ Product findCheapest()
++ Product findMostExpensive()
++ double sumPrice()
++ boolean isPromoAlreadyApplied(String)
++ void addDiscount(String)
+}
+
+
+class promocje.freeCup {
++ void applyPromo(Koszyk)
+}
+
+class koszyk.Product {
+~ String code
+~ String name
+~ double price
+~ double priceDiscounted
++ double getCurrentPrice()
++ String getName()
+}
+
+
+interface promocje.Promotion {
++ void applyPromo(Koszyk)
+}
+
+class promocje.twoPlusOne {
++ void applyPromo(Koszyk)
+}
+
+
+
+promocje.Promotion <|.. promocje.coupon30ProcentOffBucket
+promocje.Promotion <|.. promocje.over300
+promocje.Promotion <|.. promocje.freeCup
+promocje.Promotion <|.. promocje.twoPlusOne
+@enduml
